@@ -1,0 +1,2 @@
+# Maps directory — saved SLAM maps go here.
+# Use: ros2 run nav2_map_server map_saver_cli -f /g1_ws/maps/my_map

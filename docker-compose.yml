@@ -1,0 +1,76 @@
+# =========================================================
+# STAGE A — Simulation (All-in-one container)
+# Run with: ./scripts/start_sim.sh
+# =========================================================
+
+services:
+
+  # ── Build all ROS2 packages ──
+  build:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    privileged: true
+    volumes:
+      - ./src:/g1_ws/src:rw
+      - g1_build:/g1_ws/build
+      - g1_install:/g1_ws/install
+      - g1_log:/g1_ws/log
+    command: >
+      bash -c "cd /g1_ws && colcon build --symlink-install &&
+               echo '✅ Workspace build complete.'"
+
+  # ── Full simulation: Gazebo + SLAM + Nav2 (single container) ──
+  sim:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - ROS_DOMAIN_ID=0
+      - LIBGL_ALWAYS_SOFTWARE=1
+      - GZ_SIM_RESOURCE_PATH=/g1_ws/src/g1_gazebo/worlds:/g1_ws/src/g1_gazebo/models
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./src:/g1_ws/src:rw
+      - ./rviz:/g1_ws/rviz:ro
+      - ./maps:/g1_ws/maps:rw
+      - g1_build:/g1_ws/build
+      - g1_install:/g1_ws/install
+      - g1_log:/g1_ws/log
+    command: >
+      bash -c "source /g1_ws/install/setup.bash &&
+               ros2 launch g1_gazebo sim_all.launch.py"
+    depends_on:
+      build:
+        condition: service_completed_successfully
+
+  # ── RViz2 (separate for display flexibility) ──
+  rviz:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    privileged: true
+    environment:
+      - DISPLAY=${DISPLAY}
+      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./src:/g1_ws/src:rw
+      - ./rviz:/g1_ws/rviz:ro
+      - g1_build:/g1_ws/build
+      - g1_install:/g1_ws/install
+      - g1_log:/g1_ws/log
+    command: >
+      bash -c "source /g1_ws/install/setup.bash &&
+               sleep 10 && rviz2 -d /g1_ws/rviz/g1_nav.rviz"
+    depends_on:
+      - sim
+
+volumes:
+  g1_build:
+  g1_install:
+  g1_log:

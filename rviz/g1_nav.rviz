@@ -1,0 +1,151 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+  - Class: nav2_rviz_plugins/Navigation 2
+    Name: Navigation 2
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    # ── Robot Model ──
+    - Class: rviz_default_plugins/RobotModel
+      Name: G1 Robot Model
+      Enabled: true
+      Description Source: Topic
+      Description Topic:
+        Value: /robot_description
+      Alpha: 1.0
+
+    # ── TF Tree ──
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: true
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+
+    # ── 2D Occupancy Grid Map (from slam_toolbox) ──
+    - Class: rviz_default_plugins/Map
+      Name: SLAM Map
+      Enabled: true
+      Topic:
+        Value: /map
+      Alpha: 0.7
+      Color Scheme: map
+      Draw Behind: true
+
+    # ── 3D LiDAR Point Cloud ──
+    - Class: rviz_default_plugins/PointCloud2
+      Name: LiDAR PointCloud
+      Enabled: true
+      Topic:
+        Value: /lidar/points
+      Size (Pixels): 2
+      Color Transformer: Intensity
+      Decay Time: 0
+      Style: Points
+      Min Intensity: 0
+      Max Intensity: 255
+
+    # ── 2D LaserScan (from pointcloud_to_laserscan) ──
+    - Class: rviz_default_plugins/LaserScan
+      Name: LaserScan 2D
+      Enabled: true
+      Topic:
+        Value: /scan
+      Size (m): 0.03
+      Color Transformer: FlatColor
+      Color: 0; 255; 0
+      Style: Flat Squares
+
+    # ── RGB Camera Image ──
+    - Class: rviz_default_plugins/Image
+      Name: Camera RGB
+      Enabled: true
+      Topic:
+        Value: /camera/color/image_raw
+      Max Value: 1
+      Min Value: 0
+      Normalize Range: true
+
+    # ── Nav2 Global Path ──
+    - Class: rviz_default_plugins/Path
+      Name: Global Plan
+      Enabled: true
+      Topic:
+        Value: /plan
+      Color: 0; 0; 255
+      Line Style: Lines
+      Width: 0.03
+      Alpha: 1.0
+
+    # ── Nav2 Local Plan ──
+    - Class: rviz_default_plugins/Path
+      Name: Local Plan
+      Enabled: true
+      Topic:
+        Value: /local_plan
+      Color: 255; 255; 0
+      Line Style: Lines
+      Width: 0.02
+      Alpha: 0.8
+
+    # ── Local Costmap ──
+    - Class: rviz_default_plugins/Map
+      Name: Local Costmap
+      Enabled: false
+      Topic:
+        Value: /local_costmap/costmap
+      Alpha: 0.4
+      Color Scheme: costmap
+
+    # ── Global Costmap ──
+    - Class: rviz_default_plugins/Map
+      Name: Global Costmap
+      Enabled: false
+      Topic:
+        Value: /global_costmap/costmap
+      Alpha: 0.3
+      Color Scheme: costmap
+
+  Global Options:
+    Fixed Frame: map
+    Frame Rate: 30
+    Background Color: 48; 48; 48
+
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Interact
+    - Class: rviz_default_plugins/Measure
+      Line color: 128; 128; 0
+    - Class: rviz_default_plugins/SetInitialPose
+      Topic:
+        Value: /initialpose
+    - Class: rviz_default_plugins/SetGoal
+      Topic:
+        Value: /goal_pose
+
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 8.0
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0.5
+      Yaw: 0.7854
+      Pitch: 0.5236
+      Name: Orbit View
+
+Window Geometry:
+  Width: 1600
+  Height: 900
+  Displays:
+    collapsed: false
+  Views:
+    collapsed: false

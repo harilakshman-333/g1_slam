@@ -1,0 +1,45 @@
+# =========================================================
+# STAGE B — Hardware Override
+# Run with: ./scripts/start_hw.sh
+# (uses: docker-compose -f docker-compose.yml -f docker-compose.hw.yml up)
+# =========================================================
+
+services:
+
+  # Replace Gazebo sim with real G1 hardware sensor drivers
+  sim:
+    command: >
+      bash -c "ros2 launch g1_bringup hardware.launch.py"
+    environment:
+      - DISPLAY=${DISPLAY}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///g1_ws/docker/cyclone_dds.xml
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./src:/g1_ws/src:rw
+      - ./rviz:/g1_ws/rviz:ro
+      - ./maps:/g1_ws/maps:rw
+      - ./docker/cyclone_dds.xml:/g1_ws/docker/cyclone_dds.xml:ro
+    devices:
+      - /dev/bus/usb:/dev/bus/usb  # RealSense D435i USB passthrough
+
+  # SLAM with real sensor data (no sim time)
+  slam:
+    command: >
+      bash -c "ros2 launch g1_slam slam.launch.py use_sim_time:=false"
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///g1_ws/docker/cyclone_dds.xml
+    volumes:
+      - ./docker/cyclone_dds.xml:/g1_ws/docker/cyclone_dds.xml:ro
+
+  # Nav2 with real time
+  nav2:
+    command: >
+      bash -c "ros2 launch g1_navigation navigation.launch.py use_sim_time:=false"
+    environment:
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - CYCLONEDDS_URI=file:///g1_ws/docker/cyclone_dds.xml
+    volumes:
+      - ./docker/cyclone_dds.xml:/g1_ws/docker/cyclone_dds.xml:ro

@@ -1,0 +1,46 @@
+# ros_gz_bridge topic mapping configuration
+# Bridges Gazebo transport topics ↔ ROS2 topics
+#
+# Ref: https://github.com/gazebosim/ros_gz/tree/humble/ros_gz_bridge
+
+# ── LiDAR (Livox Mid-360 simulated as gpu_lidar) ──
+- topic_name: /lidar/points
+  ros_type_name: sensor_msgs/msg/PointCloud2
+  gz_type_name: gz.msgs.PointCloudPacked
+  direction: GZ_TO_ROS
+
+# ── Camera RGB ──
+- topic_name: /camera/color/image_raw
+  ros_type_name: sensor_msgs/msg/Image
+  gz_type_name: gz.msgs.Image
+  direction: GZ_TO_ROS
+
+# ── Camera Depth ──
+- topic_name: /camera/depth/image_rect_raw
+  ros_type_name: sensor_msgs/msg/Image
+  gz_type_name: gz.msgs.Image
+  direction: GZ_TO_ROS
+
+# ── Velocity commands (Nav2 / teleop → Gazebo VelocityControl) ──
+- topic_name: /cmd_vel
+  ros_type_name: geometry_msgs/msg/Twist
+  gz_type_name: gz.msgs.Twist
+  direction: ROS_TO_GZ
+
+# ── Odometry (Gazebo OdometryPublisher → ROS2) ──
+- topic_name: /odom
+  ros_type_name: nav_msgs/msg/Odometry
+  gz_type_name: gz.msgs.Odometry
+  direction: GZ_TO_ROS
+
+# ── Simulation clock ──
+- topic_name: /clock
+  ros_type_name: rosgraph_msgs/msg/Clock
+  gz_type_name: gz.msgs.Clock
+  direction: GZ_TO_ROS
+
+# ── Joint states (for robot model visualization) ──
+- topic_name: /joint_states
+  ros_type_name: sensor_msgs/msg/JointState
+  gz_type_name: gz.msgs.Model
+  direction: GZ_TO_ROS

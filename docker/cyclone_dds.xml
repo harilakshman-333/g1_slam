@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  CycloneDDS configuration for Unitree G1 hardware connection.
+  Used in Stage B (real robot). Binds DDS discovery to the
+  Ethernet interface connected to the G1 (192.168.123.x subnet).
+
+  Adjust the NetworkInterface name to match your actual interface
+  (run `ip link show` to find it — e.g. eth0, enp3s0, eno1).
+-->
+<CycloneDDS>
+  <Domain>
+    <General>
+      <Interfaces>
+        <NetworkInterface name="eth0" priority="default" multicast="default" />
+      </Interfaces>
+      <AllowMulticast>true</AllowMulticast>
+    </General>
+  </Domain>
+</CycloneDDS>

@@ -1,0 +1,291 @@
+<?xml version="1.0"?>
+<!--
+  Unitree G1 Dex3 — Simplified URDF for SLAM development.
+
+  This is a box-based approximation of the G1 body with correct:
+    - Overall dimensions (~1.27m standing height)
+    - Sensor mount positions (LiDAR on top, camera on head)
+    - TF frame hierarchy (base_footprint → base_link → torso → head → sensors)
+    - Gazebo PlanarMove plugin for /cmd_vel control (Stage A)
+
+  For visual fidelity, replace with official Unitree meshes from unitree_ros.
+-->
+<robot name="g1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Include sensor macros -->
+  <xacro:include filename="$(find g1_description)/urdf/g1_lidar.xacro"/>
+  <xacro:include filename="$(find g1_description)/urdf/g1_camera.xacro"/>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Constants                                    -->
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Note: 'pi' is a built-in xacro constant, no need to redefine -->
+  <!-- G1 body dimensions (approximate) -->
+  <xacro:property name="torso_width"  value="0.35"/>
+  <xacro:property name="torso_depth"  value="0.25"/>
+  <xacro:property name="torso_height" value="0.45"/>
+  <xacro:property name="head_radius"  value="0.10"/>
+  <xacro:property name="leg_radius"   value="0.04"/>
+  <xacro:property name="leg_length"   value="0.65"/>
+  <xacro:property name="foot_size"    value="0.15"/>
+  <xacro:property name="body_mass"    value="35.0"/>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- base_footprint: ground-level reference       -->
+  <!-- ════════════════════════════════════════════ -->
+  <link name="base_footprint"/>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- base_link: center of robot at hip height     -->
+  <!-- ════════════════════════════════════════════ -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.15 0.20 0.10"/>
+      </geometry>
+      <material name="hip_grey">
+        <color rgba="0.3 0.3 0.3 1.0"/>
+      </material>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.15 0.20 0.10"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="5.0"/>
+      <inertia ixx="0.05" ixy="0" ixz="0" iyy="0.05" iyz="0" izz="0.05"/>
+    </inertial>
+  </link>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <!-- base_link is at hip height (~0.65m above ground) -->
+    <origin xyz="0 0 0.65" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Torso                                        -->
+  <!-- ════════════════════════════════════════════ -->
+  <link name="torso_link">
+    <visual>
+      <geometry>
+        <box size="${torso_depth} ${torso_width} ${torso_height}"/>
+      </geometry>
+      <material name="unitree_blue">
+        <color rgba="0.1 0.3 0.7 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${torso_depth} ${torso_width} ${torso_height}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="15.0"/>
+      <inertia ixx="0.3" ixy="0" ixz="0" iyy="0.3" iyz="0" izz="0.2"/>
+    </inertial>
+  </link>
+
+  <joint name="torso_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="torso_link"/>
+    <origin xyz="0 0 ${torso_height/2 + 0.05}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Head                                         -->
+  <!-- ════════════════════════════════════════════ -->
+  <link name="head_link">
+    <visual>
+      <geometry>
+        <sphere radius="${head_radius}"/>
+      </geometry>
+      <material name="head_dark">
+        <color rgba="0.15 0.15 0.15 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="${head_radius}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.005" ixy="0" ixz="0" iyy="0.005" iyz="0" izz="0.005"/>
+    </inertial>
+  </link>
+
+  <joint name="head_joint" type="fixed">
+    <parent link="torso_link"/>
+    <child link="head_link"/>
+    <origin xyz="0 0 ${torso_height/2 + head_radius}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Legs (simplified — two cylinders)            -->
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Left leg -->
+  <link name="left_leg_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${leg_radius}" length="${leg_length}"/>
+      </geometry>
+      <material name="leg_grey">
+        <color rgba="0.25 0.25 0.25 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${leg_radius}" length="${leg_length}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="4.0"/>
+      <inertia ixx="0.15" ixy="0" ixz="0" iyy="0.15" iyz="0" izz="0.005"/>
+    </inertial>
+  </link>
+
+  <joint name="left_leg_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_leg_link"/>
+    <origin xyz="0 0.08 ${-leg_length/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Right leg -->
+  <link name="right_leg_link">
+    <visual>
+      <geometry>
+        <cylinder radius="${leg_radius}" length="${leg_length}"/>
+      </geometry>
+      <material name="leg_grey">
+        <color rgba="0.25 0.25 0.25 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${leg_radius}" length="${leg_length}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="4.0"/>
+      <inertia ixx="0.15" ixy="0" ixz="0" iyy="0.15" iyz="0" izz="0.005"/>
+    </inertial>
+  </link>
+
+  <joint name="right_leg_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_leg_link"/>
+    <origin xyz="0 -0.08 ${-leg_length/2}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Left foot -->
+  <link name="left_foot_link">
+    <visual>
+      <geometry>
+        <box size="${foot_size} 0.08 0.03"/>
+      </geometry>
+      <material name="foot_black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_size} 0.08 0.03"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="left_foot_joint" type="fixed">
+    <parent link="left_leg_link"/>
+    <child link="left_foot_link"/>
+    <origin xyz="0.02 0 ${-leg_length/2 - 0.015}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Right foot -->
+  <link name="right_foot_link">
+    <visual>
+      <geometry>
+        <box size="${foot_size} 0.08 0.03"/>
+      </geometry>
+      <material name="foot_black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="${foot_size} 0.08 0.03"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+
+  <joint name="right_foot_joint" type="fixed">
+    <parent link="right_leg_link"/>
+    <child link="right_foot_link"/>
+    <origin xyz="0.02 0 ${-leg_length/2 - 0.015}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Sensors                                      -->
+  <!-- ════════════════════════════════════════════ -->
+
+  <!-- Livox Mid-360 LiDAR — mounted on top of head -->
+  <xacro:g1_lidar parent_link="head_link"
+                  xyz="0 0 ${head_radius + 0.04}"
+                  rpy="0 0 0"/>
+
+  <!-- RealSense D435i — mounted on front of head -->
+  <xacro:g1_camera parent_link="head_link"
+                   xyz="${head_radius} 0 0"
+                   rpy="0 0 0"/>
+
+  <!-- ════════════════════════════════════════════ -->
+  <!-- Gazebo: PlanarMove plugin (Stage A)          -->
+  <!-- Allows /cmd_vel control without full bipedal -->
+  <!-- walking simulation. Remove for Stage B.      -->
+  <!-- ════════════════════════════════════════════ -->
+  <gazebo>
+    <plugin filename="gz-sim-odometry-publisher-system"
+            name="gz::sim::systems::OdometryPublisher">
+      <odom_topic>odom</odom_topic>
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <dimensions>3</dimensions>
+    </plugin>
+  </gazebo>
+
+  <gazebo>
+    <plugin filename="gz-sim-triggered-publisher-system"
+            name="gz::sim::systems::TriggeredPublisher"/>
+  </gazebo>
+
+  <!-- Velocity control: subscribes to /cmd_vel and moves the base -->
+  <gazebo>
+    <plugin filename="gz-sim-velocity-control-system"
+            name="gz::sim::systems::VelocityControl">
+      <topic>cmd_vel</topic>
+      <initial_linear>0 0 0</initial_linear>
+      <initial_angular>0 0 0</initial_angular>
+    </plugin>
+  </gazebo>
+
+  <!-- Joint state publisher for Gazebo -->
+  <gazebo>
+    <plugin filename="gz-sim-joint-state-publisher-system"
+            name="gz::sim::systems::JointStatePublisher">
+      <topic>joint_states</topic>
+    </plugin>
+  </gazebo>
+
+</robot>
