@@ -1,7 +1,4 @@
-<?xml version="1.0"?>
-<robot name="g1" xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <link name="base_footprint"/>
-  <joint name="base_link_joint" type="fixed"><parent link="base_footprint"/><child link="pelvis"/><origin xyz="0 0 0.75" rpy="0 0 0"/></joint>
+<robot name="g1_23dof">
   <material name="dark">
     <color rgba="0.2 0.2 0.2 1"/>
   </material>
@@ -19,6 +16,13 @@
     <parent link="world"/>
     <child link="pelvis"/>
   </joint> -->
+
+  <link name="base_footprint"/>
+  <joint name="base_link_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="pelvis"/>
+    <origin xyz="0 0 0.75" rpy="0 0 0"/>
+  </joint>
 
   <link name="pelvis">
     <inertial>
@@ -852,7 +856,19 @@
       </geometry>
     </collision>
   </link>
-  <gazebo><plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher"><odom_topic>odom</odom_topic><odom_frame>odom</odom_frame><robot_base_frame>base_footprint</robot_base_frame><odom_publish_frequency>50</odom_publish_frequency><dimensions>3</dimensions></plugin></gazebo>
-  <gazebo><plugin filename="gz-sim-velocity-control-system" name="gz::sim::systems::VelocityControl"><topic>cmd_vel</topic></plugin></gazebo>
-  <gazebo><plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher"><topic>joint_states</topic></plugin></gazebo>
+  <gazebo>
+    <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+      <odom_topic>odom</odom_topic>
+      <odom_frame>odom</odom_frame>
+      <robot_base_frame>base_footprint</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <dimensions>3</dimensions>
+    </plugin>
+    <plugin filename="gz-sim-velocity-control-system" name="gz::sim::systems::VelocityControl">
+      <topic>cmd_vel</topic>
+    </plugin>
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+      <topic>joint_states</topic>
+    </plugin>
+  </gazebo>
 </robot>

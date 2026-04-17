@@ -34,7 +34,7 @@ def generate_launch_description():
 
     world_file = os.path.join(pkg_gazebo, 'worlds', 'indoor_office.sdf')
     bridge_config = os.path.join(pkg_gazebo, 'config', 'gz_bridge.yaml')
-    xacro_file = os.path.join(pkg_description, 'urdf', 'g1.urdf.xacro')
+    xacro_file = os.path.join(pkg_description, 'urdf', 'g1_23dof.urdf')
     slam_params = os.path.join(pkg_slam, 'config', 'slam_toolbox.yaml')
     nav2_params = os.path.join(pkg_navigation, 'config', 'nav2_params.yaml')
 
@@ -81,6 +81,14 @@ def generate_launch_description():
             }]
         ),
 
+        Node(
+            package='joint_state_publisher',
+            executable='joint_state_publisher',
+            name='joint_state_publisher',
+            output='screen',
+            parameters=[{'use_sim_time': use_sim_time}]
+        ),
+
         # ════════════════════════════════════════════
         # 3. SPAWN G1 (after 5s delay for Gazebo init)
         # ════════════════════════════════════════════
@@ -120,10 +128,12 @@ def generate_launch_description():
                 '/camera/color/image_raw@sensor_msgs/msg/Image[ignition.msgs.Image',
                 # Depth camera
                 '/camera/depth/image_rect_raw@sensor_msgs/msg/Image[ignition.msgs.Image',
-                # Velocity commands (ROS -> GZ)
+                # Vel commands (ROS -> GZ)
                 '/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
                 # Odometry
                 '/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry',
+                # Joint states
+                '/joint_states@sensor_msgs/msg/JointState[ignition.msgs.Model',
             ],
             remappings=[
                 ('/lidar/points', '/scan'),
