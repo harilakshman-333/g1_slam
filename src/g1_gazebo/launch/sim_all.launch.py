@@ -86,7 +86,10 @@ def generate_launch_description():
             executable='joint_state_publisher',
             name='joint_state_publisher',
             output='screen',
-            parameters=[{'use_sim_time': use_sim_time}]
+            parameters=[
+                {'use_sim_time': use_sim_time},
+                {'robot_description': ParameterValue(Command(['xacro ', xacro_file]), value_type=str)}
+            ]
         ),
 
         # ════════════════════════════════════════════
@@ -132,8 +135,6 @@ def generate_launch_description():
                 '/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
                 # Odometry
                 '/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry',
-                # Joint states
-                '/joint_states@sensor_msgs/msg/JointState[ignition.msgs.Model',
             ],
             remappings=[
                 ('/lidar/points', '/scan'),
