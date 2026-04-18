@@ -3,12 +3,15 @@ project(g1_description)
 
 find_package(ament_cmake REQUIRED)
 
-# Install URDF, meshes, and launch files
 install(DIRECTORY
-  urdf
   meshes
-  launch
   DESTINATION share/${PROJECT_NAME}
+)
+
+install(FILES
+  g1_23dof.urdf
+  g1_comp.urdf
+  DESTINATION share/${PROJECT_NAME}/urdf
 )
 
 ament_package()

@@ -20,6 +20,7 @@ setup(
     entry_points={
         'console_scripts': [
             'cmd_vel_bridge = g1_cmd_bridge.cmd_vel_bridge:main',
+            'lowstate_jointstate_bridge = g1_cmd_bridge.lowstate_jointstate_bridge:main',
         ],
     },
 )

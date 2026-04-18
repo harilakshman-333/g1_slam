@@ -4,7 +4,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 
 # ── Core ROS2 packages for SLAM + Navigation ──
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --fix-missing \
     ros-humble-slam-toolbox \
     ros-humble-navigation2 \
     ros-humble-nav2-bringup \
@@ -23,10 +23,18 @@ RUN apt-get update && apt-get install -y \
     ros-humble-ros-gz-interfaces \
     ros-humble-realsense2-camera \
     ros-humble-realsense2-description \
+    ros-humble-rosidl-generator-dds-idl \
+    libyaml-cpp-dev \
     libeigen3-dev git cmake build-essential \
     python3-pip python3-colcon-common-extensions \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /g1_ws/src && cd /g1_ws/src && \
+    git clone https://github.com/unitreerobotics/unitree_ros.git --depth 1 && \
+    git clone https://github.com/unitreerobotics/unitree_ros2.git /tmp/unitree_ros2 --depth 1 && \
+    mv /tmp/unitree_ros2/cyclonedds_ws/src/unitree ./unitree_ros2_msgs && \
+    rm -rf /tmp/unitree_ros2
 
 # ══════════════════════════════════════════════════════════════
 # STAGE B DEPENDENCIES (hardware only — not needed for simulation)
