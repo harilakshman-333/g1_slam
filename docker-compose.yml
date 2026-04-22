@@ -28,9 +28,8 @@ services:
     privileged: true
     environment:
       - DISPLAY=${DISPLAY}
-      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - ROS_DOMAIN_ID=0
-      - LIBGL_ALWAYS_SOFTWARE=1
       - GZ_SIM_RESOURCE_PATH=/g1_ws/src/g1_gazebo/worlds:/g1_ws/src/g1_gazebo/models:/g1_ws/src
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -55,7 +54,7 @@ services:
     privileged: true
     environment:
       - DISPLAY=${DISPLAY}
-      - RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - ROS_DOMAIN_ID=0
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw

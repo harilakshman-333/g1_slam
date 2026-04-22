@@ -6,8 +6,17 @@
 
 services:
 
+  # Build with Stage B hardware dependencies enabled
+  build:
+    build:
+      args:
+        ENABLE_HW_STACK: "1"
+
   # Replace Gazebo sim with real G1 hardware sensor drivers
   sim:
+    build:
+      args:
+        ENABLE_HW_STACK: "1"
     command: >
       bash -c "ros2 launch g1_bringup hardware.launch.py"
     environment:
@@ -26,6 +35,9 @@ services:
 
   # SLAM with real sensor data (no sim time)
   slam:
+    build:
+      args:
+        ENABLE_HW_STACK: "1"
     command: >
       bash -c "ros2 launch g1_slam slam.launch.py use_sim_time:=false"
     environment:
@@ -36,6 +48,9 @@ services:
 
   # Nav2 with real time
   nav2:
+    build:
+      args:
+        ENABLE_HW_STACK: "1"
     command: >
       bash -c "ros2 launch g1_navigation navigation.launch.py use_sim_time:=false"
     environment:

@@ -46,11 +46,11 @@ Visualization Manager:
       Topic:
         Value: /lidar/points
       Size (Pixels): 2
-      Color Transformer: Intensity
-      Decay Time: 0
+      Color Transformer: FlatColor
+      Color: 0; 200; 255
+      Decay Time: 0.2
       Style: Points
-      Min Intensity: 0
-      Max Intensity: 255
+      Frame Transformer: Fixed Frame
 
     # ── 2D LaserScan (from pointcloud_to_laserscan) ──
     - Class: rviz_default_plugins/LaserScan

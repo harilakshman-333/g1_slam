@@ -21,4 +21,9 @@ if [ -f /g1_ws/docker/cyclone_dds.xml ]; then
     export CYCLONEDDS_URI=file:///g1_ws/docker/cyclone_dds.xml
 fi
 
+# Force software rendering for headless GPU LiDAR sensor (ogre2 needs OpenGL)
+export LIBGL_ALWAYS_SOFTWARE=1
+export MESA_GL_VERSION_OVERRIDE=3.3
+export OGRE_RTT_MODE=Copy
+
 exec "$@"

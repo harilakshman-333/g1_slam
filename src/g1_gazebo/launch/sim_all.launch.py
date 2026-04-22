@@ -51,7 +51,8 @@ def generate_launch_description():
         SetEnvironmentVariable(
             name='GZ_SIM_RESOURCE_PATH',
             value=os.path.join(pkg_gazebo, 'worlds') + ':' +
-                  os.path.join(pkg_gazebo, 'models')
+                  os.path.join(pkg_gazebo, 'models') + ':' +
+                  os.path.join(pkg_description)
         ),
 
         # ════════════════════════════════════════════
@@ -61,7 +62,8 @@ def generate_launch_description():
             cmd=['xvfb-run', '-a', 'ign', 'gazebo', '-s', '-r', world_file],
             output='screen',
             additional_env={
-                'IGN_GAZEBO_RESOURCE_PATH': os.path.join(pkg_gazebo, 'worlds'),
+                'IGN_GAZEBO_RESOURCE_PATH': os.path.join(pkg_gazebo, 'worlds') + ':' +
+                                            os.path.join(pkg_description),
             },
         ),
 
@@ -85,6 +87,8 @@ def generate_launch_description():
 
         # ════════════════════════════════════════════
         # 3. SPAWN G1 (after 5s delay for Gazebo init)
+        #    Uses /robot_description topic (published by RSP above)
+        #    so Gazebo receives resolved URDF with proper mesh paths
         # ════════════════════════════════════════════
         TimerAction(
             period=5.0,
@@ -96,7 +100,7 @@ def generate_launch_description():
                     output='screen',
                     arguments=[
                         '-name', 'g1',
-                        '-string', Command(['xacro ', xacro_file]),
+                        '-topic', '/robot_description',
                         '-world', 'indoor_office',
                         '-x', '0.0', '-y', '0.0', '-z', '0.05',
                     ]
@@ -116,35 +120,55 @@ def generate_launch_description():
             arguments=[
                 # Clock (CRITICAL for use_sim_time)
                 '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock',
-                # LiDAR scan directly
-                '/lidar/points@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan',
+                # LiDAR PointCloud2 (gpu_lidar sensor output)
+                '/lidar/points/points@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked',
                 # RGB camera
                 '/camera/color/image_raw@sensor_msgs/msg/Image[ignition.msgs.Image',
                 # Depth camera
                 '/camera/depth/image_rect_raw@sensor_msgs/msg/Image[ignition.msgs.Image',
                 # Vel commands (ROS -> GZ)
                 '/cmd_vel@geometry_msgs/msg/Twist]ignition.msgs.Twist',
-                # Odometry
+                # Odometry (from OdometryPublisher plugin)
                 '/odom@nav_msgs/msg/Odometry[ignition.msgs.Odometry',
-                # Joint states (GZ -> ROS)
+                # TF from Gazebo odometry plugin
+                '/tf@tf2_msgs/msg/TFMessage[ignition.msgs.Pose_V',
+                # Joint states
                 '/world/indoor_office/model/g1/joint_state@sensor_msgs/msg/JointState[ignition.msgs.Model',
             ],
             remappings=[
-                ('/lidar/points', '/scan'),
                 ('/world/indoor_office/model/g1/joint_state', '/joint_states'),
             ]
         ),
 
         # ════════════════════════════════════════════
-        # 5. STATIC TF: odom → base_footprint fallback
+        # 5. POINTCLOUD TO LASERSCAN
+        #    Converts 3D LiDAR cloud to 2D scan for SLAM
         # ════════════════════════════════════════════
         Node(
-            package='tf2_ros',
-            executable='static_transform_publisher',
-            name='odom_to_base_footprint',
+            package='pointcloud_to_laserscan',
+            executable='pointcloud_to_laserscan_node',
+            name='pointcloud_to_laserscan',
             output='screen',
-            arguments=['0', '0', '0', '0', '0', '0', 'odom', 'base_footprint'],
-            parameters=[{'use_sim_time': use_sim_time}],
+            parameters=[{
+                'use_sim_time': use_sim_time,
+                'min_height': -0.1,
+                'max_height': 0.2,
+                'angle_min': -3.14159,
+                'angle_max': 3.14159,
+                'angle_increment': 0.00349,
+                'scan_time': 0.1,
+                'range_min': 0.1,
+                'range_max': 40.0,
+                'target_frame': 'lidar_link',
+                'use_inf': True,
+                'qos_overrides./lidar/points/points.subscription.reliability': 'reliable',
+                'qos_overrides./scan.publisher.reliability': 'reliable',
+                'qos_overrides./scan.publisher.durability': 'volatile',
+            }],
+            remappings=[
+                ('cloud_in', '/lidar/points/points'),
+                ('scan', '/scan'),
+            ]
         ),
 
         # ════════════════════════════════════════════
